@@ -8,13 +8,13 @@ We're using Stream's unified platform for both chat and video features:
 - **Stream Chat** - Real-time messaging between doctors and patients
 - **Stream Video** - HD video consultations with built-in UI
 
-**App ID: 1444513**
+**API Key: `cahz5hr5r6pt`**
 
 ## Prerequisites
 
 1. Stream account (sign up at [getstream.io](https://getstream.io))
-2. Your Stream API Key and App ID (already configured: `1444513`)
-3. Backend (Xano) set up to generate Stream user tokens
+2. Your Stream API Key (already configured: `cahz5hr5r6pt`)
+3. Backend (Xano) set up to generate Stream user tokens - **See XANO_STREAM_TOKENS.md for detailed setup**
 
 ## Features Implemented
 
@@ -43,7 +43,7 @@ We're using Stream's unified platform for both chat and video features:
 ### 1. Stream Dashboard Configuration
 
 1. Go to [getstream.io/dashboard](https://getstream.io/dashboard)
-2. Select your app (App ID: 1444513)
+2. Select your app (API Key: `cahz5hr5r6pt`)
 3. Navigate to **Chat** section:
    - Enable push notifications
    - Configure webhook URLs (for Xano integration)
@@ -56,59 +56,30 @@ We're using Stream's unified platform for both chat and video features:
 
 ### 2. Backend Token Generation (Xano)
 
-Stream requires server-side token generation for security. You need to create Xano endpoints that generate tokens:
+Stream requires server-side token generation for security. You need to create Xano endpoints that generate tokens.
 
-#### Create Chat Token Endpoint
+**📚 For complete step-by-step instructions, see: `XANO_STREAM_TOKENS.md`**
 
-**Endpoint:** `POST /stream/chat-token`
+That guide includes:
+- Your actual API credentials
+- Detailed Xano setup instructions
+- Complete code examples
+- Multiple implementation options
+- Testing and troubleshooting
 
-```javascript
-// Xano Function Stack
-const userId = input.user_id;
-const streamUserId = `user_${userId}`;
+**Quick Summary:**
 
-// Generate Stream Chat token
-const token = generateStreamToken(streamUserId, 'STREAM_SECRET');
+You need to create two Xano endpoints:
+- `POST /stream/chat-token` - Returns chat token
+- `POST /stream/video-token` - Returns video token
 
-return { token };
-```
-
-#### Create Video Token Endpoint
-
-**Endpoint:** `POST /stream/video-token`
-
-```javascript
-// Xano Function Stack
-const userId = input.user_id;
-const streamUserId = `user_${userId}`;
-
-// Generate Stream Video token
-const token = generateStreamToken(streamUserId, 'STREAM_SECRET');
-
-return { token };
-```
+Both endpoints generate JWT tokens using your Stream API Secret:
+- **API Secret**: `scj6n6h399xsb5b9pwq5xsetfzvndq24zv2npbr9znmxgeky5f22cajzh44ma4vy`
+- Store this in Xano environment variables as `STREAM_API_SECRET`
+- Use HS256 algorithm
+- Set expiration time (recommended: 24 hours)
 
 **Important:** Never expose your Stream Secret in the mobile app. Always generate tokens on the backend.
-
-### 3. Get Your Stream Secret
-
-1. Go to Stream Dashboard
-2. Navigate to your app settings
-3. Find "API Key" and "Secret"
-4. Copy the **Secret** (keep it secure!)
-5. Store it in Xano as an environment variable: `STREAM_SECRET`
-
-### 4. Token Generation Formula
-
-Stream tokens are JWT tokens. Here's the format:
-
-```
-Header: { "alg": "HS256", "typ": "JWT" }
-Payload: { "user_id": "user_123" }
-Signature: HMACSHA256(header + payload, STREAM_SECRET)
-```
-
-In Xano, you can use the built-in JWT functions or install a Stream token library.
 
 ### 5. Mobile App Configuration
 
@@ -293,4 +264,8 @@ For production, you'll need to upgrade based on usage. See: https://getstream.io
 
 ---
 
-**Note**: Current implementation uses App ID `1444513`. Make sure this matches your Stream dashboard app.
+**Your Stream Credentials:**
+- **API Key**: `cahz5hr5r6pt` (configured in app)
+- **API Secret**: `scj6n6h399xsb5b9pwq5xsetfzvndq24zv2npbr9znmxgeky5f22cajzh44ma4vy` (backend only)
+
+Make sure your Stream dashboard app matches these credentials.

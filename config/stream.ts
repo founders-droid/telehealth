@@ -1,7 +1,8 @@
 // Stream Configuration
 export const STREAM_CONFIG = {
-  API_KEY: process.env.EXPO_PUBLIC_STREAM_API_KEY || '1444513',
-  APP_ID: process.env.EXPO_PUBLIC_STREAM_APP_ID || '1444513',
+  API_KEY: process.env.EXPO_PUBLIC_STREAM_API_KEY || 'cahz5hr5r6pt',
+  // API Secret is stored on backend (Xano) - NEVER expose it in the app
+  // API_SECRET: 'scj6n6h399xsb5b9pwq5xsetfzvndq24zv2npbr9znmxgeky5f22cajzh44ma4vy'
 };
 
 // Generate Stream user ID from app user ID
