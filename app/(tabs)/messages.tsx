@@ -1,63 +1,75 @@
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useConversations, useUnreadCount } from '../../hooks/useMessages';
+import { useRealtime } from '../../hooks/useRealtime';
 import { formatRelativeTime } from '../../utils/formatters';
 import Card from '../../components/ui/Card';
 import Avatar from '../../components/ui/Avatar';
 
 export default function MessagesScreen() {
   const router = useRouter();
-
-  // Mock data for now - will be replaced with actual API call
-  const conversations = [
-    {
-      id: 1,
-      user: {
-        id: 1,
-        first_name: 'John',
-        last_name: 'Doe',
-        profile_photo: '',
-      },
-      last_message: {
-        message_text: 'Thank you for the consultation!',
-        created_at: new Date().toISOString(),
-        is_read: true,
-      },
-      unread_count: 0,
-    },
-    {
-      id: 2,
-      user: {
-        id: 2,
-        first_name: 'Jane',
-        last_name: 'Smith',
-        profile_photo: '',
-      },
-      last_message: {
-        message_text: 'Can we reschedule our appointment?',
-        created_at: new Date(Date.now() - 3600000).toISOString(),
-        is_read: false,
-      },
-      unread_count: 2,
-    },
-  ];
+  const { data: conversations, isLoading, refetch } = useConversations();
+  const unreadCount = useUnreadCount();
+  const { isConnected } = useRealtime();
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       {/* Header */}
       <View className="bg-white px-6 py-4 border-b border-gray-200">
-        <Text className="text-2xl font-bold text-gray-900">Messages</Text>
+        <View className="flex-row items-center justify-between">
+          <View>
+            <Text className="text-2xl font-bold text-gray-900">Messages</Text>
+            {unreadCount > 0 && (
+              <Text className="text-sm text-gray-600 mt-1">
+                {unreadCount} unread message{unreadCount !== 1 ? 's' : ''}
+              </Text>
+            )}
+          </View>
+
+          {/* Realtime Connection Status */}
+          <View className="flex-row items-center">
+            <View
+              className={`w-2 h-2 rounded-full mr-2 ${
+                isConnected ? 'bg-green-500' : 'bg-gray-400'
+              }`}
+            />
+            <Text className="text-xs text-gray-600">
+              {isConnected ? 'Live' : 'Connecting...'}
+            </Text>
+          </View>
+        </View>
       </View>
 
       {/* Conversations List */}
-      <ScrollView className="flex-1">
-        {conversations.length > 0 ? (
+      <ScrollView
+        className="flex-1"
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={() => refetch()}
+            tintColor="#0073e6"
+          />
+        }
+      >
+        {isLoading && !conversations ? (
+          <View className="flex-1 items-center justify-center py-20">
+            <ActivityIndicator size="large" color="#0073e6" />
+          </View>
+        ) : conversations && conversations.length > 0 ? (
           <View className="px-6 py-4 space-y-2">
             {conversations.map((conversation) => (
               <TouchableOpacity
-                key={conversation.id}
+                key={conversation.user.id}
                 onPress={() =>
-                  router.push(`/conversation/${conversation.user.id}` as any)
+                  router.push({
+                    pathname: '/conversation/[userId]' as any,
+                    params: {
+                      userId: conversation.user.id,
+                      userName: `${conversation.user.first_name} ${conversation.user.last_name}`,
+                      userPhoto: conversation.user.profile_photo,
+                    },
+                  })
                 }
               >
                 <Card className="p-4">
